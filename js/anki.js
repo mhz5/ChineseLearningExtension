@@ -30,8 +30,6 @@ async function fetchAnkiDecks() {
     // avoid making the call if it fails once.
     // the user is still able to go into options and get anki up and running. A successful call
     // will get it set back to enabled.
-    // I could also use AbortSignal or something, but setting up hardcoded timeouts feels worse.
-    // admittedly this still isn't a great experience, as your first request would be slow.
     if (disabled) {
         return [];
     }
@@ -43,7 +41,9 @@ async function fetchAnkiDecks() {
     try {
         // TODO: combine with callAnkiConnect
         const ankiConnectResponse = await fetch(ankiConnectBaseUrl, {
-            body: JSON.stringify(request), method: 'POST'
+            signal: AbortSignal.timeout(500),
+            body: JSON.stringify(request),
+            method: 'POST'
         });
         const responseJson = await ankiConnectResponse.json();
         disabled = false;
