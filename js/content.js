@@ -10,6 +10,11 @@ let popover;
 let observer;
 let popoverDelay = 500; // default value
 
+chrome.storage.session.get().then(items => {
+    console.log(popoverDelay);
+    return popoverDelay = items.popoverDelay;
+});
+
 function isVisibleNode(node) {
     if (node.nodeName === 'SCRIPT' || node.nodeName === 'STYLE' || node.nodeName === 'META') {
         return false;
@@ -185,6 +190,7 @@ function addTones() {
                     i++;
                 }
                 wrapper.addEventListener('mouseenter', async function () {
+                    console.log("popoverDelay: " + popoverDelay);
                     cancelShowPopover();
                     const response = await chrome.runtime.sendMessage({ type: 'definitions', word: segment });
                     // unclear in what cases response is null or undefined, but it does happen. Being defensive.
@@ -236,11 +242,4 @@ if (document.getElementsByClassName('chineselearningextension-popover').length =
 
     // Start observing the target node for configured mutations
     observer.observe(document.body, mutationConfig);
-
-    // Load popup delay from storage
-    chrome.storage.session.get('popoverDelay', (items) => {
-        if (items.popoverDelay) {
-            popoverDelay = items.popoverDelay;
-        }
-    });
 }
