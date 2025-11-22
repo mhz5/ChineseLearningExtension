@@ -8,6 +8,7 @@ const wordSegmenter = new Intl.Segmenter("zh-CN", { granularity: "word" });
 const sentenceSegmenter = new Intl.Segmenter("zh-CN", { granularity: "sentence" });
 let popover;
 let observer;
+let popoverDelay = 500; // default value
 
 function isVisibleNode(node) {
     if (node.nodeName === 'SCRIPT' || node.nodeName === 'STYLE' || node.nodeName === 'META') {
@@ -127,7 +128,7 @@ function triggerHidePopover() {
     }
     pendingHideTimeout = setTimeout(function () {
         popover.hidePopover();
-    }, 500);
+    }, popoverDelay);
 }
 
 function cancelHidePopover() {
@@ -197,7 +198,7 @@ function addTones() {
                         popover.style.top = `${boundingBox.bottom + window.scrollY}px`;
                         render(getDictionaryTemplate(segment, response.definitions, sentence, openSidePanel), popover);
                         popover.showPopover()
-                    }, 500);
+                    }, popoverDelay);
                 });
                 wrapper.addEventListener('mouseleave', function () {
                     cancelShowPopover();
@@ -235,4 +236,11 @@ if (document.getElementsByClassName('chineselearningextension-popover').length =
 
     // Start observing the target node for configured mutations
     observer.observe(document.body, mutationConfig);
+
+    // Load popup delay from storage
+    chrome.storage.session.get('popoverDelay', (items) => {
+        if (items.popoverDelay) {
+            popoverDelay = items.popoverDelay;
+        }
+    });
 }

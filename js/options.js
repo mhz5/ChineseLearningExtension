@@ -4,6 +4,7 @@ const integrationsForm = document.getElementById('integration-options');
 // const forvoField = document.getElementById('forvo-api-key');
 const openAiField = document.getElementById('openai-api-key');
 const resultMessage = document.getElementById('result-message');
+const popoverDelayField = document.getElementById('popover-delay');
 
 const ankiConnectField = document.getElementById('anki-connect-info');
 const ankiConnectStatusCheckButton = document.getElementById('check-anki-connect-status');
@@ -15,7 +16,8 @@ integrationsForm.addEventListener('submit', function (e) {
     chrome.storage.session.set({
         /*'forvoKey': forvoField.value,*/
         'openAiKey': openAiField.value,
-        'ankiConnectKey': ankiConnectKeyInput.value
+        'ankiConnectKey': ankiConnectKeyInput.value,
+        'popoverDelay': parseInt(popoverDelayField.value) || 500
     }).then(() => {
         resultMessage.innerText = "Successfully saved.";
         setTimeout(() => {
@@ -27,10 +29,10 @@ integrationsForm.addEventListener('submit', function (e) {
 chrome.storage.session.get().then(items => {
     if (!items.openAiKey && !items.ankiConnectKey) {
         renderAnkiConnectStatus();
-        return;
     }
     openAiField.value = items.openAiKey || '';
     ankiConnectKeyInput.value = items.ankiConnectKey || '';
+    popoverDelayField.value = items.popoverDelay || 500;
     setAnkiConnectKey(items.ankiConnectKey);
     renderAnkiConnectStatus();
 });
