@@ -32,6 +32,7 @@ integrationsForm.addEventListener('submit', function (e) {
 chrome.storage.sync.get().then(items => {
     if (!items.openAiKey && !items.ankiConnectKey) {
         renderAnkiConnectStatus();
+        return;
     }
     openAiField.value = items.openAiKey || '';
     ankiConnectKeyInput.value = items.ankiConnectKey || '';
