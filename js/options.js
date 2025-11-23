@@ -19,7 +19,7 @@ integrationsForm.addEventListener('submit', function (e) {
     chrome.storage.session.set({
         /*'forvoKey': forvoField.value,*/
         'openAiKey': openAiField.value,
-        'ankiConnectKey': ankiConnectKeyInput.value,
+        'ankiConnectKey': ankiConnectKeyInput.value
     }).then(() => {
         resultMessage.innerText = "Successfully saved.";
         setTimeout(() => {
@@ -32,7 +32,7 @@ integrationsForm.addEventListener('submit', function (e) {
     });
 });
 
-
+// Load the current options.
 chrome.storage.session.get().then(items => {
     if (!items.openAiKey && !items.ankiConnectKey) {
         renderAnkiConnectStatus();
@@ -45,7 +45,7 @@ chrome.storage.session.get().then(items => {
 });
 
 chrome.storage.sync.get().then(items => {
-    popoverDelayField.value = items.popoverDelay;
+    popoverDelayField.value = items.popoverDelay || 500;
 })
 
 async function renderAnkiConnectStatus() {
