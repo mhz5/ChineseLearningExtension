@@ -4,42 +4,49 @@ const integrationsForm = document.getElementById('integration-options');
 // const forvoField = document.getElementById('forvo-api-key');
 const openAiField = document.getElementById('openai-api-key');
 const resultMessage = document.getElementById('result-message');
-const popoverDelayField = document.getElementById('popover-delay');
 
 const ankiConnectField = document.getElementById('anki-connect-info');
 const ankiConnectStatusCheckButton = document.getElementById('check-anki-connect-status');
 const ankiConnectKeyInput = document.getElementById('anki-connect-key');
 
+const popoverDelayField = document.getElementById('popover-delay');
+
 integrationsForm.addEventListener('submit', function (e) {
     e.preventDefault();
     setAnkiConnectKey(ankiConnectKeyInput.value);
     // https://developer.chrome.com/docs/extensions/reference/api/storage
-    // By default, it's not exposed to content scripts (storage.session)
-    chrome.storage.sync.set({
+    // Use chrome.storage.session for sensitive data like API keys.
+    chrome.storage.session.set({
         /*'forvoKey': forvoField.value,*/
         'openAiKey': openAiField.value,
         'ankiConnectKey': ankiConnectKeyInput.value,
-        'popoverDelay': parseInt(popoverDelayField.value) || 500,
     }).then(() => {
         resultMessage.innerText = "Successfully saved.";
         setTimeout(() => {
             resultMessage.innerText = '';
         }, 3000);
     });
+    // Use chrome.storage.sync for nonsensitive data.
+    chrome.storage.sync.set({
+        'popoverDelay': parseInt(popoverDelayField.value),
+    });
 });
 
 
-chrome.storage.sync.get().then(items => {
+chrome.storage.session.get().then(items => {
     if (!items.openAiKey && !items.ankiConnectKey) {
         renderAnkiConnectStatus();
         return;
     }
     openAiField.value = items.openAiKey || '';
     ankiConnectKeyInput.value = items.ankiConnectKey || '';
-    popoverDelayField.value = items.popoverDelay || 500;
     setAnkiConnectKey(items.ankiConnectKey);
     renderAnkiConnectStatus();
 });
+
+chrome.storage.sync.get().then(items => {
+    popoverDelayField.value = items.popoverDelay;
+})
 
 async function renderAnkiConnectStatus() {
     const permissionResult = await requestPermission();
@@ -54,7 +61,7 @@ async function renderAnkiConnectStatus() {
     } else {
         // we don't need the key, and seemingly including one in that case causes problems...
         Array.from(document.getElementsByClassName('anki-connect-key')).forEach(keyElement => keyElement.style.display = 'none');
-        chrome.storage.sync.remove('ankiConnectKey');
+        chrome.storage.session.remove('ankiConnectKey');
         setAnkiConnectKey(undefined);
     }
     const decks = await fetchAnkiDecks();
@@ -72,7 +79,7 @@ async function renderAnkiConnectStatus() {
 ankiConnectStatusCheckButton.addEventListener('click', async function (event) {
     event.preventDefault();
     event.stopImmediatePropagation();
-    await chrome.storage.sync.set({
+    await chrome.storage.session.set({
         'ankiConnectKey': ankiConnectKeyInput.value
     });
     setAnkiConnectKey(ankiConnectKeyInput.value);
