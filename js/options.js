@@ -15,7 +15,7 @@ integrationsForm.addEventListener('submit', function (e) {
     e.preventDefault();
     setAnkiConnectKey(ankiConnectKeyInput.value);
     const sensitiveData = {
-        /*'forvoKey': forvoField?.value,*/
+        /*'forvoKey': forvoField.value,*/
         'openAiKey': openAiField.value,
         'ankiConnectKey': ankiConnectKeyInput.value
     };
