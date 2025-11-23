@@ -16,19 +16,25 @@ integrationsForm.addEventListener('submit', function (e) {
     setAnkiConnectKey(ankiConnectKeyInput.value);
     // https://developer.chrome.com/docs/extensions/reference/api/storage
     // Use chrome.storage.session for sensitive data like API keys.
-    chrome.storage.session.set({
-        /*'forvoKey': forvoField.value,*/
+    const sensitiveData = {
+        /*'forvoKey': forvoField?.value,*/
         'openAiKey': openAiField.value,
         'ankiConnectKey': ankiConnectKeyInput.value
-    }).then(() => {
+    };
+    const nonsensitiveData = {
+        'popoverDelay': parseInt(popoverDelayField.value),
+    };
+
+    Promise.all([
+        chrome.storage.session.set(sensitiveData),
+        chrome.storage.sync.set(nonsensitiveData),
+    ]).then(() => {
         resultMessage.innerText = "Successfully saved.";
         setTimeout(() => {
             resultMessage.innerText = '';
         }, 3000);
-    });
-    // Use chrome.storage.sync for nonsensitive data.
-    chrome.storage.sync.set({
-        'popoverDelay': parseInt(popoverDelayField.value),
+    }).catch((err) => {
+        resultMessage.innerText = "Error saving settings: " + err;
     });
 });
 

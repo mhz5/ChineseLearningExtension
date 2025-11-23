@@ -10,11 +10,12 @@ let popover;
 let observer;
 let popoverDelay = 500;
 
+// Initial options load.
 chrome.storage.sync.get('popoverDelay').then((data) => {
     popoverDelay = data.popoverDelay;
 });
 
-// Watch for changes to the user's options & apply them
+// Listen for options changes, and update option values.
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area === 'sync' && changes.popoverDelay?.newValue) {
     popoverDelay = parseInt(changes.popoverDelay.newValue);
