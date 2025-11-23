@@ -18,7 +18,7 @@ chrome.storage.sync.get('popoverDelay').then((data) => {
 // Listen for options changes, and update option values.
 chrome.storage.onChanged.addListener((changes, area) => {
     const newPopoverDelay = changes.popoverDelay?.newValue
-    if (area === 'sync' && changes.popoverDelay?.newValue) {
+    if (area === 'sync' && newPopoverDelay) {
         popoverDelay = parseInt(newPopoverDelay);
     }
 });
