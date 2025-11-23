@@ -14,8 +14,6 @@ const popoverDelayField = document.getElementById('popover-delay');
 integrationsForm.addEventListener('submit', function (e) {
     e.preventDefault();
     setAnkiConnectKey(ankiConnectKeyInput.value);
-    // https://developer.chrome.com/docs/extensions/reference/api/storage
-    // Use chrome.storage.session for sensitive data like API keys.
     const sensitiveData = {
         /*'forvoKey': forvoField?.value,*/
         'openAiKey': openAiField.value,
@@ -26,8 +24,8 @@ integrationsForm.addEventListener('submit', function (e) {
     };
 
     Promise.all([
-        chrome.storage.session.set(sensitiveData),
-        chrome.storage.sync.set(nonsensitiveData),
+        chrome.storage.session.set(sensitiveData), // chrome.storage.session for sensitive data like API keys. (https://developer.chrome.com/docs/extensions/reference/api/storage)
+        chrome.storage.sync.set(nonsensitiveData), // chrome.storage.sync for nonsensitive data.
     ]).then(() => {
         resultMessage.innerText = "Successfully saved.";
         setTimeout(() => {
