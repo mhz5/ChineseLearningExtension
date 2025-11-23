@@ -76,7 +76,7 @@ async function updateWithCurrentWord() {
     renderDeckSelector(currentAnkiDecks);
 }
 
-chrome.storage.session.get().then(items => {
+chrome.storage.sync.get().then(items => {
     currentWord = items.word;
     currentSentence = items.sentence;
     currentForvoKey = items.forvoKey;
@@ -85,7 +85,7 @@ chrome.storage.session.get().then(items => {
     updateWithCurrentWord();
 });
 
-chrome.storage.session.onChanged.addListener(async (changes) => {
+chrome.storage.sync.onChanged.addListener(async (changes) => {
     if (changes['forvoKey'] || changes['openAiKey'] || changes['ankiConnectKey']) {
         if (changes['forvoKey']) {
             currentForvoKey = changes['forvoKey'].newValue;

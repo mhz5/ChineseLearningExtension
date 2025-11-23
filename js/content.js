@@ -10,9 +10,19 @@ let popover;
 let observer;
 let popoverDelay = 500; // default value
 
-chrome.storage.session.get().then(items => {
-    console.log(popoverDelay);
-    return popoverDelay = items.popoverDelay;
+chrome.storage.sync.get('popoverDelay').then((items) => {
+    console.log(items);
+    popoverDelay = items.popoverDelay;
+});
+
+// Watch for changes to the user's options & apply them
+chrome.storage.onChanged.addListener((changes, area) => {
+    console.log(area);
+    console.log(changes);
+  if (area === 'sync' && changes.popoverDelay?.newValue) {
+    console.log(changes.popoverDelay.newValue);
+    popoverDelay = parseInt(changes.popoverDelay.newValue);
+  }
 });
 
 function isVisibleNode(node) {
@@ -190,7 +200,6 @@ function addTones() {
                     i++;
                 }
                 wrapper.addEventListener('mouseenter', async function () {
-                    console.log("popoverDelay: " + popoverDelay);
                     cancelShowPopover();
                     const response = await chrome.runtime.sendMessage({ type: 'definitions', word: segment });
                     // unclear in what cases response is null or undefined, but it does happen. Being defensive.

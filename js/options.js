@@ -13,11 +13,13 @@ const ankiConnectKeyInput = document.getElementById('anki-connect-key');
 integrationsForm.addEventListener('submit', function (e) {
     e.preventDefault();
     setAnkiConnectKey(ankiConnectKeyInput.value);
-    chrome.storage.session.set({
+    // https://developer.chrome.com/docs/extensions/reference/api/storage
+    // By default, it's not exposed to content scripts (storage.session)
+    chrome.storage.sync.set({
         /*'forvoKey': forvoField.value,*/
         'openAiKey': openAiField.value,
         'ankiConnectKey': ankiConnectKeyInput.value,
-        'popoverDelay': parseInt(popoverDelayField.value) || 500
+        'popoverDelay': parseInt(popoverDelayField.value) || 500,
     }).then(() => {
         resultMessage.innerText = "Successfully saved.";
         setTimeout(() => {
@@ -26,7 +28,8 @@ integrationsForm.addEventListener('submit', function (e) {
     });
 });
 
-chrome.storage.session.get().then(items => {
+
+chrome.storage.sync.get().then(items => {
     if (!items.openAiKey && !items.ankiConnectKey) {
         renderAnkiConnectStatus();
     }
@@ -50,7 +53,7 @@ async function renderAnkiConnectStatus() {
     } else {
         // we don't need the key, and seemingly including one in that case causes problems...
         Array.from(document.getElementsByClassName('anki-connect-key')).forEach(keyElement => keyElement.style.display = 'none');
-        chrome.storage.session.remove('ankiConnectKey');
+        chrome.storage.sync.remove('ankiConnectKey');
         setAnkiConnectKey(undefined);
     }
     const decks = await fetchAnkiDecks();
@@ -68,7 +71,7 @@ async function renderAnkiConnectStatus() {
 ankiConnectStatusCheckButton.addEventListener('click', async function (event) {
     event.preventDefault();
     event.stopImmediatePropagation();
-    await chrome.storage.session.set({
+    await chrome.storage.sync.set({
         'ankiConnectKey': ankiConnectKeyInput.value
     });
     setAnkiConnectKey(ankiConnectKeyInput.value);
