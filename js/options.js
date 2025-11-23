@@ -9,21 +9,34 @@ const ankiConnectField = document.getElementById('anki-connect-info');
 const ankiConnectStatusCheckButton = document.getElementById('check-anki-connect-status');
 const ankiConnectKeyInput = document.getElementById('anki-connect-key');
 
+const popoverDelayField = document.getElementById('popover-delay');
+
 integrationsForm.addEventListener('submit', function (e) {
     e.preventDefault();
     setAnkiConnectKey(ankiConnectKeyInput.value);
-    chrome.storage.session.set({
+    const sensitiveData = {
         /*'forvoKey': forvoField.value,*/
         'openAiKey': openAiField.value,
         'ankiConnectKey': ankiConnectKeyInput.value
-    }).then(() => {
+    };
+    const nonsensitiveData = {
+        'popoverDelay': parseInt(popoverDelayField.value),
+    };
+
+    Promise.all([
+        chrome.storage.session.set(sensitiveData), // chrome.storage.session for sensitive data like API keys. (https://developer.chrome.com/docs/extensions/reference/api/storage)
+        chrome.storage.sync.set(nonsensitiveData), // chrome.storage.sync for nonsensitive data.
+    ]).then(() => {
         resultMessage.innerText = "Successfully saved.";
         setTimeout(() => {
             resultMessage.innerText = '';
         }, 3000);
+    }).catch((err) => {
+        resultMessage.innerText = "Error saving settings: " + err;
     });
 });
 
+// Load the current options.
 chrome.storage.session.get().then(items => {
     if (!items.openAiKey && !items.ankiConnectKey) {
         renderAnkiConnectStatus();
@@ -34,6 +47,10 @@ chrome.storage.session.get().then(items => {
     setAnkiConnectKey(items.ankiConnectKey);
     renderAnkiConnectStatus();
 });
+
+chrome.storage.sync.get().then(items => {
+    popoverDelayField.value = items.popoverDelay || 500;
+})
 
 async function renderAnkiConnectStatus() {
     const permissionResult = await requestPermission();
